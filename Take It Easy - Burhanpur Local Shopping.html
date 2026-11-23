@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take It Easy - Burhanpur Local</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Smooth custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        /* Map Pulse Animation */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        .map-pin-pulse::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 9999px;
+            background-color: #10b981;
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            z-index: 0;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
+
+    <!-- Toast Notification Banner (Replaces alert) -->
+    <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-96 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+    <!-- ========================================== -->
+    <!-- 1. LOGIN SCREEN (FIRST SCREEN)             -->
+    <!-- ========================================== -->
+    <div id="login-screen" class="min-h-screen flex flex-col justify-between bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-4 sm:p-6">
+        
+        <!-- Top Discrete Admin / Website Owner Login Trigger -->
+        <div class="max-w-md w-full mx-auto flex justify-end">
+            <button onclick="openAdminModal()" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-emerald-700 bg-white/80 backdrop-blur border border-slate-200 px-3 py-1.5 rounded-full shadow-sm transition">
+                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Owner Login
+            </button>
+        </div>
+
+        <!-- Center Brand & Login Card -->
+        <div class="max-w-md w-full mx-auto my-auto py-6">
+            <!-- Custom SVG Brand Logo -->
+            <div class="flex flex-col items-center text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-3xl shadow-lg shadow-emerald-200 flex items-center justify-center mb-4 transform -rotate-3 hover:rotate-0 transition duration-300">
+                    <svg class="w-12 h-12 text-white" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Shopping Bag + Location Pin Hybrid Logo -->
+                        <path d="M12 18C12 15.7909 13.7909 14 16 14H32C34.2091 14 36 15.7909 36 18V36C36 39.3137 33.3137 42 30 42H18C14.6863 42 12 39.3137 12 36V18Z" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18 14V11C18 7.68629 20.6863 5 24 5C27.3137 5 30 7.68629 30 11V14" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+                        <!-- Smile / Easy Check Curve -->
+                        <path d="M18 25C19.5 28 22 29.5 24 29.5C26 29.5 28.5 28 30 25" stroke="#FCD34D" stroke-width="3.2" stroke-linecap="round"/>
+                        <circle cx="24" cy="21" r="2" fill="#FCD34D"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+                    Take It <span class="text-emerald-600">Easy</span>
+                </h1>
+                <div class="inline-flex items-center gap-1.5 mt-1.5 px-3 py-0.5 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-semibold">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                    Burhanpur Local Market
+                </div>
+                <p class="text-sm text-slate-500 mt-2 max-w-xs">Apne shehar ki har chhoti-badi dukaan ab aapke phone par.</p>
+            </div>
+
+            <!-- Role Switcher Tabs -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-6">
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl mb-6">
+                    <button id="tab-customer-login" onclick="switchLoginRole('customer')" class="py-2.5 text-sm font-semibold rounded-xl bg-white text-emerald-700 shadow-sm transition">
+                        Customer Login
+                    </button>
+                    <button id="tab-dealer-login" onclick="switchLoginRole('dealer')" class="py-2.5 text-sm font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition">
+                        Shop Owner / Dealer
+                    </button>
+                </div>
+
+                <!-- Customer Login Form -->
+                <form id="customer-login-form" onsubmit="handleCustomerLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Aapka Naam</label>
+                        <input type="text" id="cust-name" required placeholder="e.g. Rahul Sharma" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Mobile Number</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3.5 text-sm font-medium text-slate-400">+91</span>
+                            <input type="tel" id="cust-phone" required pattern="[0-9]{10}" maxlength="10" placeholder="98260 XXXXX" class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm transition">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold rounded-xl shadow-md shadow-emerald-200 transition flex items-center justify-center gap-2">
+                        <span>Continue as Customer</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </form>
+
+                <!-- Dealer / Shop Owner Login Form (Hidden by default) -->
+                <form id="dealer-login-form" onsubmit="handleDealerLogin(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Shop / Dukaan Ka Naam</label>
+                        <input type="text" id="dealer-shop-name" required placeholder="e.g. Mahalaxmi Kirana Store" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Owner Name</label>
+                            <input type="text" id="dealer-owner-name" required placeholder="Suresh Jain" class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Burhanpur Area</label>
+                            <select id="dealer-area" class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 outline-none text-sm bg-white">
+                                <option value="Shanwara Gate">Shanwara Gate</option>
+                                <option value="Khandwa Road">Khandwa Road</option>
+                                <option value="Sindhi Basti">Sindhi Basti</option>
+                                <option value="Budhwara Bazaar">Budhwara Bazaar</option>
+                                <option value="Lalbagh">Lalbagh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Mobile Number (KYC Linked)</label>
+                        <input type="tel" id="dealer-phone" required pattern="[0-9]{10}" maxlength="10" placeholder="98260 XXXXX" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-sm transition">
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 active:scale-[0.99] text-white font-semibold rounded-xl shadow-md shadow-teal-200 transition">
+                        Open My Shop Panel
+                    </button>
+                </form>
+
+                <!-- Quick Guest Preview -->
+                <div class="mt-5 pt-4 border-t border-slate-100 text-center">
+                    <button onclick="loginAsGuest()" class="text-xs font-semibold text-slate-500 hover:text-emerald-600 transition">
+                        Skip Login & Explore Burhanpur Shops →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-xs text-slate-400">Made for Burhanpur • Local Shops & Fast Delivery</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ADMIN PIN MODAL (ONLY FOR WEBSITE OWNER)   -->
+    <!-- ========================================== -->
+    <div id="admin-pin-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-slate-900">Website Owner Access</h3>
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Sirf website owner ke liye. Master Dashboard kholne ke liye apna secret PIN enter karein.</p>
+            <form onsubmit="verifyAdminPin(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="admin-pin-input" maxlength="6" required placeholder="Enter Secret PIN" class="w-full text-center tracking-[0.5em] font-bold text-lg px-4 py-3 rounded-xl border border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none">
+                    <p class="text-[11px] text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg mt-2 text-center">
+                        Testing Hint: Default Owner PIN is <strong>1234</strong>
+                    </p>
+                </div>
+                <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition">
+                    Verify & Open Master Panel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN CUSTOMER / DEALER APP VIEW         -->
+    <!-- ========================================== -->
+    <div id="main-app" class="hidden min-h-screen flex flex-col pb-20 sm:pb-8">
+        
+        <!-- Sticky Top Header -->
+        <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+            <div class="max-w-5xl mx-auto px-4 py-3">
+                <div class="flex items-center justify-between gap-3">
+                    <!-- Brand Logo + Name -->
+                    <div class="flex items-center gap-2.5 cursor-pointer" onclick="setActiveTab('home')">
+                        <div class="w-9 h-9 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5 text-white" viewBox="0 0 48 48" fill="none">
+                                <path d="M12 18C12 15.7909 13.7909 14 16 14H32C34.2091 14 36 15.7909 36 18V36C36 39.3137 33.3137 42 30 42H18C14.6863 42 12 39.3137 12 36V18Z" stroke="currentColor" stroke-width="3.5"/>
+                                <path d="M18 14V11C18 7.68629 20.6863 5 24 5C27.3137 5 30 7.68629 30 11V14" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+                                <path d="M18 25C19.5 28 22 29.5 24 29.5C26 29.5 28.5 28 30 25" stroke="#FCD34D" stroke-width="3.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-extrabold leading-none text-slate-900">Take It <span class="text-emerald-600">Easy</span></h1>
+                            <div class="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5">
+                                <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                <span id="header-location-text" class="font-medium text-slate-700">Burhanpur, MP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right User Info & Logout -->
+                    <div class="flex items-center gap-2">
+                        <span id="user-badge" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-100">
+                            Hi, Guest
+                        </span>
+                        <button onclick="logout()" class="text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-3 py-2 rounded-xl transition">
+                            Switch / Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prominent Search Bar -->
+                <div class="mt-3 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Burhanpur me shop ya product search karein (e.g. Kirana, Rice, Mobile, Sweets)..." class="w-full pl-10 pr-10 py-2.5 bg-slate-100/90 focus:bg-white border border-transparent focus:border-emerald-500 rounded-2xl text-sm outline-none transition shadow-inner focus:shadow-sm">
+                    <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Desktop Navigation Tabs (4 Main Options: Home, Nearby, Location, Map) -->
+                <nav class="hidden sm:flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
+                    <button onclick="setActiveTab('home')" data-tab="home" class="nav-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Home
+                    </button>
+                    <button onclick="setActiveTab('nearby')" data-tab="nearby" class="nav-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Nearby
+                    </button>
+                    <button onclick="setActiveTab('location')" data-tab="location" class="nav-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Location
+                    </button>
+                    <button onclick="setActiveTab('map')" data-tab="map" class="nav-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        Map
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Dealer Quick Banner (Only shown if logged in as Dealer) -->
+        <div id="dealer-quick-bar" class="hidden bg-teal-900 text-white px-4 py-2.5 text-xs">
+            <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded bg-teal-700 font-bold text-[10px] uppercase">Shop Owner Mode</span>
+                    <span id="dealer-bar-text">Aapki dukaan live hai!</span>
+                </div>
+                <button onclick="openDealerAddProductModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-3 py-1 rounded-lg transition">
+                    + Add Product (Photo Scan)
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="max-w-5xl w-full mx-auto px-4 pt-5 flex-1">
+
+            <!-- TAB 1: HOME VIEW -->
+            <section id="view-home" class="space-y-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-5 sm:p-6 text-white shadow-lg shadow-emerald-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="inline-block px-2.5 py-1 rounded-full bg-white/20 text-xs font-semibold mb-2">Burhanpur Hyperlocal</span>
+                        <h2 class="text-xl sm:text-2xl font-bold">Seedha Dukaan Se Ghar Tak</h2>
+                        <p class="text-emerald-50 text-xs sm:text-sm mt-1">Apne aas-paas ki dukaanon ke products dekhein, call karein ya ₹20 delivery par mangwayein.</p>
+                    </div>
+                    <button onclick="setActiveTab('map')" class="shrink-0 bg-white text-emerald-700 hover:bg-emerald-50 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                        Open Map View
+                    </button>
+                </div>
+
+                <!-- Shops Grid -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold text-slate-800" id="home-section-title">Popular Shops in Burhanpur</h3>
+                        <span class="text-xs text-slate-500 font-medium" id="shop-count-badge">6 Shops Open</span>
+                    </div>
+                    <div id="home-shops-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Rendered dynamically via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: NEARBY VIEW -->
+            <section id="view-nearby" class="hidden space-y-5">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center relative">
+                            <span class="w-3 h-3 bg-emerald-600 rounded-full animate-ping absolute"></span>
+                            <svg class="w-5 h-5 relative" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900">Live GPS Location Active</h3>
+                            <p class="text-xs text-slate-500" id="live-gps-coords">Near Shanwara Chowk, Burhanpur (21.3105° N, 76.2297° E)</p>
+                        </div>
+                    </div>
+                    <button onclick="simulateGpsRefresh()" class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3.5 py-2 rounded-xl border border-emerald-200 transition self-start sm:self-auto">
+                        ↻ Refresh Live Distance
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 mb-3">Sabse Paas Ki Dukaanein (Closest First)</h3>
+                    <div id="nearby-shops-list" class="space-y-3">
+                        <!-- Rendered dynamically sorted by distance -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: LOCATION (AREA FILTER) VIEW -->
+            <section id="view-location" class="hidden space-y-5">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">Burhanpur Area Chunein</label>
+                    <div id="area-pills" class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+                        <!-- Area filter buttons rendered via JS -->
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 mb-3" id="location-heading">All Areas in Burhanpur</h3>
+                    <div id="location-shops-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Filtered shops by area -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: INTERACTIVE BURHANPUR MAP VIEW -->
+            <section id="view-map" class="hidden space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Burhanpur Live Shop Map</h3>
+                        <p class="text-xs text-slate-500">Kisi bhi shop ki location pin par tap karein uski dukaan kholne ke liye</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Tap Pin = Open Shop
+                    </span>
+                </div>
+
+                <!-- Interactive Illustrated Map Canvas of Burhanpur -->
+                <div class="relative w-full h-[440px] sm:h-[500px] bg-[#e8f0e8] rounded-3xl border-2 border-slate-200 shadow-inner overflow-hidden select-none">
+                    
+                    <!-- Stylized Burhanpur Geography SVG Background (Tapti River, Roads, Landmarks) -->
+                    <svg class="w-full h-full object-cover" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+                        <!-- Map Grid Blocks -->
+                        <rect width="800" height="500" fill="#eef4ee"/>
+                        <path d="M0 100 H800 M0 250 H800 M0 400 H800 M150 0 V500 M400 0 V500 M650 0 V500" stroke="#dfe8df" stroke-width="2"/>
+                        
+                        <!-- Tapti River Curve at Bottom-Right -->
+                        <path d="M520 500 C560 390, 680 350, 800 310 L800 500 Z" fill="#bae6fd" opacity="0.85"/>
+                        <path d="M520 500 C560 390, 680 350, 800 310" stroke="#7dd3fc" stroke-width="6" fill="none"/>
+                        <text x="670" y="435" fill="#0369a1" font-size="13" font-weight="700" opacity="0.8">Tapti River</text>
+
+                        <!-- Main Roads (Khandwa Road, Shanwara Road, Station Road) -->
+                        <path d="M120 0 L380 240 L760 220" stroke="#ffffff" stroke-width="14" stroke-linecap="round" fill="none"/>
+                        <path d="M120 0 L380 240 L760 220" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="8 6" fill="none"/>
+                        
+                        <path d="M380 240 L340 490" stroke="#ffffff" stroke-width="12" stroke-linecap="round" fill="none"/>
+                        <path d="M100 340 L380 240 L520 70" stroke="#ffffff" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+                        <!-- Area Labels on Map -->
+                        <text x="355" y="215" fill="#64748b" font-size="12" font-weight="700">SHANWARA GATE</text>
+                        <text x="140" y="95" fill="#64748b" font-size="11" font-weight="700">KHANDWA ROAD</text>
+                        <text x="530" y="130" fill="#64748b" font-size="11" font-weight="700">SINDHI BASTI</text>
+                        <text x="160" y="375" fill="#64748b" font-size="11" font-weight="700">LALBAGH AREA</text>
+                        <text x="385" y="390" fill="#64748b" font-size="11" font-weight="700">BUDHWARA BAZAAR</text>
+                    </svg>
+
+                    <!-- User "You Are Here" Live Dot -->
+                    <div style="top: 48%; left: 47%;" class="absolute -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center pointer-events-none">
+                        <div class="w-4 h-4 bg-blue-600 border-2 border-white rounded-full shadow-md animate-bounce"></div>
+                        <span class="mt-1 px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded-full shadow">You</span>
+                    </div>
+
+                    <!-- Dynamic Shop Location Pins Container -->
+                    <div id="map-pins-container" class="absolute inset-0">
+                        <!-- Pins injected via JS; clicking any pin opens that shop's storefront! -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Mobile Bottom Navigation Bar (4 Requested Options: Home, Nearby, Location, Map) -->
+        <nav class="sm:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-30 px-2 py-1.5 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+            <div class="grid grid-cols-4 gap-1">
+                <button onclick="setActiveTab('home')" data-tab="home" class="mobile-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-600 bg-emerald-50 font-bold text-[11px]">
+                    <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    Home
+                </button>
+                <button onclick="setActiveTab('nearby')" data-tab="nearby" class="mobile-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]">
+                    <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Nearby
+                </button>
+                <button onclick="setActiveTab('location')" data-tab="location" class="mobile-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]">
+                    <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Location
+                </button>
+                <button onclick="setActiveTab('map')" data-tab="map" class="mobile-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]">
+                    <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    Map
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. SHOP STOREFRONT MODAL (OPENS ON CLICK)  -->
+    <!-- ========================================== -->
+    <div id="shop-storefront-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden flex items-end sm:items-center justify-center sm:p-4">
+        <div class="bg-white w-full max-w-2xl max-h-[92vh] rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-[slideUp_0.25s_ease-out]">
+            
+            <!-- Shop Cover Header -->
+            <div class="relative h-40 sm:h-48 bg-slate-800 shrink-0">
+                <img id="modal-shop-banner" src="" alt="Shop Banner" class="w-full h-full object-cover opacity-80">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent"></div>
+                
+                <button onclick="closeShopModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="absolute bottom-4 left-5 right-5 text-white">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="modal-shop-category" class="px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider">Kirana</span>
+                        <span id="modal-shop-distance" class="text-xs text-emerald-300 font-semibold">• 250m away</span>
+                    </div>
+                    <h2 id="modal-shop-name" class="text-xl sm:text-2xl font-extrabold leading-tight">Shop Name</h2>
+                    <p id="modal-shop-address" class="text-xs text-slate-300 mt-0.5">Owner: Name • Address</p>
+                </div>
+            </div>
+
+            <!-- Action Bar: Call Owner & Delivery Note -->
+            <div class="px-5 py-3 bg-emerald-50/80 border-b border-emerald-100 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div class="text-xs text-slate-700">
+                    <span class="font-bold text-emerald-800">Local Delivery:</span> ₹20 base charge per round
+                </div>
+                <a id="modal-call-btn" href="tel:+919826000000" onclick="notifyCall(event)" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                    Call Shop Owner
+                </a>
+            </div>
+
+            <!-- Shop Products Catalog -->
+            <div class="p-5 overflow-y-auto flex-1 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-slate-800">Available Products in Shop</h3>
+                    <span class="text-xs text-slate-400">Tap item to order/inquire</span>
+                </div>
+                <div id="modal-products-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Products injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. MASTER ADMIN DASHBOARD (OWNER ONLY)     -->
+    <!-- ========================================== -->
+    <div id="admin-dashboard" class="hidden min-h-screen bg-slate-900 text-slate-100 p-4 sm:p-6">
+        <div class="max-w-4xl mx-auto space-y-6">
+            
+            <!-- Admin Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-extrabold flex items-center justify-center">
+                        TE
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg text-white">Take It Easy — Master Owner Panel</h1>
+                        <p class="text-xs text-slate-400">Burhanpur Hyperlocal Control Center</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition">
+                    Exit Owner Panel
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-4">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-xs text-slate-400">Total Live Shops</p>
+                    <p id="admin-total-shops" class="text-2xl font-extrabold text-emerald-400 mt-1">6</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-xs text-slate-400">Pending KYC</p>
+                    <p class="text-2xl font-extrabold text-amber-400 mt-1">2</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-xs text-slate-400">Delivery Base Rate</p>
+                    <p class="text-2xl font-extrabold text-sky-400 mt-1">₹20</p>
+                </div>
+            </div>
+
+            <!-- Add New Shop to Burhanpur Map & List -->
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                <h2 class="font-bold text-base text-white mb-4">+ Add Verified Shop to Burhanpur Map</h2>
+                <form onsubmit="adminAddShop(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input type="text" id="new-shop-name" required placeholder="Shop Name (e.g. Raja Electronics)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500">
+                    <input type="text" id="new-shop-owner" required placeholder="Owner Name (e.g. Rajesh Verma)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500">
+                    <select id="new-shop-area" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500">
+                        <option value="Shanwara Gate">Shanwara Gate</option>
+                        <option value="Khandwa Road">Khandwa Road</option>
+                        <option value="Sindhi Basti">Sindhi Basti</option>
+                        <option value="Budhwara Bazaar">Budhwara Bazaar</option>
+                        <option value="Lalbagh">Lalbagh</option>
+                    </select>
+                    <input type="tel" id="new-shop-phone" required placeholder="Owner Phone (10 digits)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-emerald-500">
+                    <button type="submit" class="sm:col-span-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition">
+                        Approve KYC & Publish Shop Live
+                    </button>
+                </form>
+            </div>
+
+            <!-- Registered Shops List -->
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
+                <h3 class="font-bold text-sm text-slate-300 mb-3">Live Burhanpur Shops Directory</h3>
+                <div id="admin-shops-table" class="space-y-2.5">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- DEALER QUICK PRODUCT UPLOAD MODAL          -->
+    <!-- ========================================== -->
+    <div id="dealer-product-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-slate-900">Smart Product Listing (AI Scan)</h3>
+                <button onclick="closeDealerAddProductModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Packet ki photo chunein — naam aur details apne aap bhar jayengi!</p>
+            <div class="space-y-3">
+                <button type="button" onclick="simulateAiScan()" class="w-full py-3 border-2 border-dashed border-emerald-300 bg-emerald-50/60 hover:bg-emerald-50 rounded-2xl text-emerald-700 text-xs font-bold flex items-center justify-center gap-2 transition">
+                    📷 Simulate Packet Photo Auto-Scan
+                </button>
+                <input type="text" id="ai-prod-name" placeholder="Product Name (Auto-fills on scan)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+                <input type="number" id="ai-prod-price" placeholder="Selling Price (₹)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+                <button onclick="saveDealerProduct()" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm">
+                    Publish to My Shop
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APPLICATION LOGIC               -->
+    <!-- ========================================== -->
+    <script>
+        // Secret PIN for Website Owner
+        const OWNER_SECRET_PIN = "1234";
+
+        // Current App State
+        let currentUser = null;
+        let activeTab = 'home';
+        let selectedArea = 'All Areas';
+        let searchQuery = '';
+
+        // Burhanpur Local Shops Dataset (with Map Coordinates & Products)
+        let shopsData = [
+            {
+                id: 1,
+                name: "Mahalaxmi Kirana & General Store",
+                owner: "Suresh Agrawal",
+                category: "Kirana & Grocery",
+                area: "Shanwara Gate",
+                address: "Near Shanwara Chowk, Main Road, Burhanpur",
+                distanceMeters: 180,
+                phone: "9826011223",
+                isOpen: true,
+                mapX: 46, // % on map
+                mapY: 46,
+                banner: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "India Gate Basmati Rice (5kg)", price: 480, stock: "In Stock" },
+                    { name: "Fortune Sunflower Oil (1L)", price: 135, stock: "In Stock" },
+                    { name: "Toor Dal Premium (1kg)", price: 155, stock: "In Stock" },
+                    { name: "Aashirvaad Atta (10kg)", price: 430, stock: "Limited" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Nimar Sweets & Namkeen Bhandar",
+                owner: "Maheshwari Brothers",
+                category: "Sweets & Snacks",
+                area: "Budhwara Bazaar",
+                address: "Gandhi Chowk, Budhwara Bazaar, Burhanpur",
+                distanceMeters: 420,
+                phone: "9826044556",
+                isOpen: true,
+                mapX: 52,
+                mapY: 72,
+                banner: "https://images.unsplash.com/photo-1589119908995-c6837fa14848?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "Burhanpur Special Mawa Jalebi (1kg)", price: 320, stock: "Fresh Hot" },
+                    { name: "Ratlami Sev Namkeen (500g)", price: 110, stock: "In Stock" },
+                    { name: "Kaju Katli Box (500g)", price: 450, stock: "In Stock" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Shree Balaji Mobile & Electronics",
+                owner: "Vikram Rathore",
+                category: "Electronics",
+                area: "Khandwa Road",
+                address: "Opp. Bus Stand, Khandwa Road, Burhanpur",
+                distanceMeters: 750,
+                phone: "9826077889",
+                isOpen: true,
+                mapX: 25,
+                mapY: 22,
+                banner: "https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "Fast Type-C Charger 33W", price: 599, stock: "In Stock" },
+                    { name: "Wireless Neckband Earphones", price: 899, stock: "In Stock" },
+                    { name: "Tempered Glass & Back Cover", price: 199, stock: "In Stock" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Jhulelal Super Mart & Dairy",
+                owner: "Harish Makhija",
+                category: "Daily Needs",
+                area: "Sindhi Basti",
+                address: "Main Market, Sindhi Basti, Burhanpur",
+                distanceMeters: 950,
+                phone: "9826099001",
+                isOpen: true,
+                mapX: 68,
+                mapY: 28,
+                banner: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "Amul Gold Milk (1L)", price: 66, stock: "In Stock" },
+                    { name: "Fresh Paneer (200g)", price: 90, stock: "In Stock" },
+                    { name: "Cold Drinks & Juices Pack", price: 120, stock: "In Stock" }
+                ]
+            },
+            {
+                id: 5,
+                name: "Royal Medical & Chemist",
+                owner: "Dr. Irfan Qureshi",
+                category: "Pharmacy",
+                area: "Lalbagh",
+                address: "Station Road, Lalbagh, Burhanpur",
+                distanceMeters: 1350,
+                phone: "9826033221",
+                isOpen: true,
+                mapX: 24,
+                mapY: 68,
+                banner: "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "First Aid & Healthcare Kit", price: 350, stock: "In Stock" },
+                    { name: "Digital Thermometer", price: 220, stock: "In Stock" },
+                    { name: "Baby Care & Hygiene Essentials", price: 280, stock: "In Stock" }
+                ]
+            },
+            {
+                id: 6,
+                name: "Gurukripa Krishi & Hardware",
+                owner: "Dinesh Patidar",
+                category: "Hardware & Tools",
+                area: "Khandwa Road",
+                address: "Near Renuka Mandi, Khandwa Road, Burhanpur",
+                distanceMeters: 1650,
+                phone: "9826066554",
+                isOpen: true,
+                mapX: 33,
+                mapY: 34,
+                banner: "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "Asian Paints Tractor Emulsion (4L)", price: 780, stock: "In Stock" },
+                    { name: "LED Flood Light 50W", price: 650, stock: "In Stock" },
+                    { name: "Home Tool Kit Set", price: 490, stock: "In Stock" }
+                ]
+            }
+        ];
+
+        const burhanpurAreas = ["All Areas", "Shanwara Gate", "Khandwa Road", "Sindhi Basti", "Budhwara Bazaar", "Lalbagh"];
+
+        // ==========================================
+        // TOAST NOTIFICATION HELPER (NO ALERT)
+        // ==========================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
+            toast.className = `${bgClass} text-white text-xs font-medium px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3 pointer-events-auto transition-all duration-300`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ==========================================
+        // LOGIN & ROLE MANAGEMENT
+        // ==========================================
+        function switchLoginRole(role) {
+            const custTab = document.getElementById('tab-customer-login');
+            const dealTab = document.getElementById('tab-dealer-login');
+            const custForm = document.getElementById('customer-login-form');
+            const dealForm = document.getElementById('dealer-login-form');
+
+            if (role === 'customer') {
+                custTab.className = "py-2.5 text-sm font-semibold rounded-xl bg-white text-emerald-700 shadow-sm transition";
+                dealTab.className = "py-2.5 text-sm font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition";
+                custForm.classList.remove('hidden');
+                dealForm.classList.add('hidden');
+            } else {
+                dealTab.className = "py-2.5 text-sm font-semibold rounded-xl bg-white text-teal-700 shadow-sm transition";
+                custTab.className = "py-2.5 text-sm font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition";
+                dealForm.classList.remove('hidden');
+                custForm.classList.add('hidden');
+            }
+        }
+
+        function handleCustomerLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('cust-name').value.trim();
+            currentUser = { role: 'customer', name: name || 'Customer' };
+            enterMainApp();
+            showToast(`Swagat hai ${currentUser.name}! Burhanpur shops ready hain.`);
+        }
+
+        function handleDealerLogin(e) {
+            e.preventDefault();
+            const shopName = document.getElementById('dealer-shop-name').value.trim();
+            const ownerName = document.getElementById('dealer-owner-name').value.trim();
+            const area = document.getElementById('dealer-area').value;
+            const phone = document.getElementById('dealer-phone').value.trim();
+
+            // Add dealer's new shop if not already present
+            const newShop = {
+                id: Date.now(),
+                name: shopName,
+                owner: ownerName,
+                category: "Verified Local Shop",
+                area: area,
+                address: `${area}, Burhanpur, MP`,
+                distanceMeters: 120,
+                phone: phone,
+                isOpen: true,
+                mapX: 48,
+                mapY: 42,
+                banner: "https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "Featured Store Item 1", price: 199, stock: "In Stock" },
+                    { name: "Featured Store Item 2", price: 349, stock: "In Stock" }
+                ]
+            };
+            shopsData.unshift(newShop);
+            currentUser = { role: 'dealer', name: ownerName, shopId: newShop.id, shopName: shopName };
+            enterMainApp();
+            showToast(`Shop "${shopName}" live ho gayi hai!`);
+        }
+
+        function loginAsGuest() {
+            currentUser = { role: 'guest', name: 'Guest' };
+            enterMainApp();
+        }
+
+        function enterMainApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+
+            const badge = document.getElementById('user-badge');
+            badge.textContent = currentUser.role === 'dealer' ? `Shop: ${currentUser.shopName}` : `Hi, ${currentUser.name}`;
+
+            const dealerBar = document.getElementById('dealer-quick-bar');
+            if (currentUser.role === 'dealer') {
+                dealerBar.classList.remove('hidden');
+                document.getElementById('dealer-bar-text').textContent = `Aapki shop "${currentUser.shopName}" Burhanpur map par live hai.`;
+            } else {
+                dealerBar.classList.add('hidden');
+            }
+
+            renderAllViews();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        // ==========================================
+        // ADMIN / WEBSITE OWNER ACCESS
+        // ==========================================
+        function openAdminModal() {
+            document.getElementById('admin-pin-input').value = '';
+            document.getElementById('admin-pin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-pin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('admin-pin-input').value.trim();
+            if (pin === OWNER_SECRET_PIN) {
+                closeAdminModal();
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                renderAdminDashboard();
+                showToast("Welcome Website Owner! Master Panel Unlocked.");
+            } else {
+                showToast("Galat PIN! Sirf website owner login kar sakte hain.", "error");
+            }
+        }
+
+        function renderAdminDashboard() {
+            document.getElementById('admin-total-shops').textContent = shopsData.length;
+            const table = document.getElementById('admin-shops-table');
+            table.innerHTML = shopsData.map(shop => `
+                <div class="flex items-center justify-between bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 text-xs">
+                    <div>
+                        <p class="font-bold text-white">${shop.name}</p>
+                        <p class="text-slate-400">${shop.owner} • ${shop.area} • 📞 ${shop.phone}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold">KYC Verified</span>
+                </div>
+            `).join('');
+        }
+
+        function adminAddShop(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-shop-name').value.trim();
+            const owner = document.getElementById('new-shop-owner').value.trim();
+            const area = document.getElementById('new-shop-area').value;
+            const phone = document.getElementById('new-shop-phone').value.trim();
+
+            shopsData.unshift({
+                id: Date.now(),
+                name,
+                owner,
+                category: "Verified Store",
+                area,
+                address: `${area}, Burhanpur`,
+                distanceMeters: Math.floor(Math.random() * 900) + 150,
+                phone,
+                isOpen: true,
+                mapX: Math.floor(Math.random() * 55) + 20,
+                mapY: Math.floor(Math.random() * 55) + 20,
+                banner: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80",
+                products: [
+                    { name: "Popular Store Item", price: 250, stock: "In Stock" }
+                ]
+            });
+
+            e.target.reset();
+            renderAdminDashboard();
+            showToast(`"${name}" Burhanpur map par add ho gayi hai!`);
+        }
+
+        // ==========================================
+        // NAVIGATION TABS & SEARCH
+        // ==========================================
+        function setActiveTab(tabName) {
+            activeTab = tabName;
+
+            // Update Desktop Tab Styles
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.className = "nav-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-emerald-600 text-white transition";
+                } else {
+                    btn.className = "nav-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition";
+                }
+            });
+
+            // Update Mobile Tab Styles
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabName) {
+                    btn.className = "mobile-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-600 bg-emerald-50 font-bold text-[11px]";
+                } else {
+                    btn.className = "mobile-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-500 font-medium text-[11px]";
+                }
+            });
+
+            // Show/Hide Sections
+            ['home', 'nearby', 'location', 'map'].forEach(sec => {
+                const el = document.getElementById(`view-${sec}`);
+                if (sec === tabName) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            renderAllViews();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val.trim().toLowerCase();
+            const clearBtn = document.getElementById('clear-search-btn');
+            if (searchQuery.length > 0) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+
+            renderAllViews();
+        }
+
+        function clearSearch() {
+            document.getElementById('global-search').value = '';
+            handleSearch('');
+        }
+
+        function getFilteredShops() {
+            if (!searchQuery) return shopsData;
+            return shopsData.filter(shop => {
+                const matchShop = shop.name.toLowerCase().includes(searchQuery) ||
+                                  shop.area.toLowerCase().includes(searchQuery) ||
+                                  shop.category.toLowerCase().includes(searchQuery);
+                const matchProduct = shop.products.some(p => p.name.toLowerCase().includes(searchQuery));
+                return matchShop || matchProduct;
+            });
+        }
+
+        function formatDistance(meters) {
+            return meters < 1000 ? `${meters}m` : `${(meters / 1000).toFixed(1)} km`;
+        }
+
+        // ==========================================
+        // RENDER VIEWS (HOME, NEARBY, LOCATION, MAP)
+        // ==========================================
+        function renderAllViews() {
+            const filtered = getFilteredShops();
+            renderHomeGrid(filtered);
+            renderNearbyList(filtered);
+            renderLocationView(filtered);
+            renderMapPins(filtered);
+        }
+
+        function createShopCardHTML(shop) {
+            return `
+                <div onclick="openShopStorefront(${shop.id})" class="group bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md hover:border-emerald-300 transition cursor-pointer flex flex-col">
+                    <div class="relative h-36 bg-slate-100 overflow-hidden">
+                        <img src="${shop.banner}" alt="${shop.name}" onerror="this.src='https://placehold.co/600x300/10b981/ffffff?text=${encodeURIComponent(shop.name)}'" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <div class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-white/95 backdrop-blur text-[11px] font-bold text-slate-800 shadow-sm">
+                            📍 ${shop.area}
+                        </div>
+                        <div class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow">
+                            ${formatDistance(shop.distanceMeters)}
+                        </div>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-semibold text-emerald-700">${shop.category}</span>
+                                <span class="text-[11px] font-semibold text-emerald-600">● Open</span>
+                            </div>
+                            <h4 class="font-bold text-slate-900 text-base mt-0.5 group-hover:text-emerald-700 transition line-clamp-1">${shop.name}</h4>
+                            <p class="text-xs text-slate-500 mt-1 line-clamp-1">${shop.products.length} Products • Owner: ${shop.owner}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-emerald-600 group-hover:translate-x-0.5 transition">View Products →</span>
+                            <a href="tel:+91${shop.phone}" onclick="event.stopPropagation(); notifyCall(event)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 text-xs font-semibold transition">
+                                📞 Call
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHomeGrid(shops) {
+            const grid = document.getElementById('home-shops-grid');
+            document.getElementById('shop-count-badge').textContent = `${shops.length} Shops Available`;
+            document.getElementById('home-section-title').textContent = searchQuery ? `Search Results for "${searchQuery}"` : "Popular Shops in Burhanpur";
+
+            if (shops.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">Koi shop ya product nahi mila. Doosra naam search karein.</div>`;
+                return;
+            }
+            grid.innerHTML = shops.map(createShopCardHTML).join('');
+        }
+
+        function renderNearbyList(shops) {
+            const list = document.getElementById('nearby-shops-list');
+            const sorted = [...shops].sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+            list.innerHTML = sorted.map((shop, idx) => `
+                <div onclick="openShopStorefront(${shop.id})" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 hover:border-emerald-400 shadow-sm flex items-center justify-between gap-3 cursor-pointer transition">
+                    <div class="flex items-center gap-3.5 min-w-0">
+                        <div class="w-14 h-14 rounded-xl bg-emerald-50 overflow-hidden shrink-0 border border-slate-100">
+                            <img src="${shop.banner}" alt="${shop.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">${formatDistance(shop.distanceMeters)}</span>
+                                ${idx === 0 ? '<span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Closest</span>' : ''}
+                            </div>
+                            <h4 class="font-bold text-sm text-slate-900 truncate mt-1">${shop.name}</h4>
+                            <p class="text-xs text-slate-500 truncate">${shop.area} • ${shop.products.length} items</p>
+                        </div>
+                    </div>
+                    <button class="shrink-0 px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-sm">
+                        Open
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function simulateGpsRefresh() {
+            shopsData.forEach(s => {
+                const delta = Math.floor(Math.random() * 60) - 30;
+                s.distanceMeters = Math.max(90, s.distanceMeters + delta);
+            });
+            renderAllViews();
+            showToast("Live GPS location updated!");
+        }
+
+        function renderLocationView(shops) {
+            const pillsContainer = document.getElementById('area-pills');
+            pillsContainer.innerHTML = burhanpurAreas.map(area => {
+                const active = area === selectedArea;
+                return `
+                    <button onclick="selectAreaFilter('${area}')" class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition ${active ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                        ${area}
+                    </button>
+                `;
+            }).join('');
+
+            const areaFiltered = selectedArea === 'All Areas' ? shops : shops.filter(s => s.area === selectedArea);
+            document.getElementById('location-heading').textContent = selectedArea === 'All Areas' ? 'All Areas in Burhanpur' : `Shops in ${selectedArea}`;
+            document.getElementById('header-location-text').textContent = selectedArea === 'All Areas' ? 'Burhanpur, MP' : `${selectedArea}, Burhanpur`;
+
+            const grid = document.getElementById('location-shops-grid');
+            if (areaFiltered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">Is area me abhi koi shop listed nahi hai.</div>`;
+                return;
+            }
+            grid.innerHTML = areaFiltered.map(createShopCardHTML).join('');
+        }
+
+        function selectAreaFilter(area) {
+            selectedArea = area;
+            renderAllViews();
+        }
+
+        function renderMapPins(shops) {
+            const container = document.getElementById('map-pins-container');
+            container.innerHTML = shops.map(shop => `
+                <button onclick="openShopStorefront(${shop.id})" style="top: ${shop.mapY}%; left: ${shop.mapX}%;" class="group absolute -translate-x-1/2 -translate-y-full z-20 flex flex-col items-center focus:outline-none">
+                    <!-- Shop Name Pill -->
+                    <div class="mb-1 px-2.5 py-1 rounded-xl bg-white/95 group-hover:bg-emerald-600 text-slate-900 group-hover:text-white shadow-md border border-slate-200 group-hover:border-emerald-600 transition transform group-hover:scale-105 whitespace-nowrap">
+                        <p class="text-[11px] font-extrabold leading-none">${shop.name}</p>
+                        <p class="text-[9px] opacity-80 mt-0.5">${shop.area} • Tap to Open</p>
+                    </div>
+                    <!-- Location Marker Pin -->
+                    <div class="relative w-7 h-7 rounded-full bg-emerald-600 text-white border-2 border-white shadow-lg flex items-center justify-center map-pin-pulse">
+                        <svg class="w-3.5 h-3.5 relative z-10" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        // ==========================================
+        // SHOP STOREFRONT MODAL (OPENS ON PIN/CARD)
+        // ==========================================
+        function openShopStorefront(shopId) {
+            const shop = shopsData.find(s => s.id === shopId);
+            if (!shop) return;
+
+            document.getElementById('modal-shop-banner').src = shop.banner;
+            document.getElementById('modal-shop-category').textContent = shop.category;
+            document.getElementById('modal-shop-distance').textContent = `• ${formatDistance(shop.distanceMeters)} away`;
+            document.getElementById('modal-shop-name').textContent = shop.name;
+            document.getElementById('modal-shop-address').textContent = `Owner: ${shop.owner} • ${shop.address}`;
+            document.getElementById('modal-call-btn').href = `tel:+91${shop.phone}`;
+
+            const prodList = document.getElementById('modal-products-list');
+            prodList.innerHTML = shop.products.map(prod => `
+                <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 flex items-center justify-between gap-3">
+                    <div>
+                        <span class="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md mb-1">${prod.stock}</span>
+                        <h4 class="font-bold text-sm text-slate-900">${prod.name}</h4>
+                        <p class="text-sm font-extrabold text-emerald-700 mt-0.5">₹${prod.price}</p>
+                    </div>
+                    <button onclick="orderProduct('${shop.name.replace(/'/g, "\\'")}', '${prod.name.replace(/'/g, "\\'")}', ${prod.price})" class="shrink-0 px-3 py-2 rounded-xl bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold transition">
+                        + Order
+                    </button>
+                </div>
+            `).join('');
+
+            document.getElementById('shop-storefront-modal').classList.remove('hidden');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shop-storefront-modal').classList.add('hidden');
+        }
+
+        function orderProduct(shopName, productName, price) {
+            showToast(`Order Request Sent to ${shopName}: ${productName} (₹${price}) + ₹20 Delivery`);
+        }
+
+        function notifyCall(e) {
+            showToast("Connecting call to Shop Owner...");
+        }
+
+        // ==========================================
+        // DEALER AI PRODUCT SCAN DEMO
+        // ==========================================
+        function openDealerAddProductModal() {
+            document.getElementById('ai-prod-name').value = '';
+            document.getElementById('ai-prod-price').value = '';
+            document.getElementById('dealer-product-modal').classList.remove('hidden');
+        }
+
+        function closeDealerAddProductModal() {
+            document.getElementById('dealer-product-modal').classList.add('hidden');
+        }
+
+        function simulateAiScan() {
+            const sampleProducts = [
+                { name: "Parle-G Gold Biscuits Family Pack (1kg)", price: 110 },
+                { name: "Tata Salt Iodized Packet (1kg)", price: 28 },
+                { name: "Surf Excel Easy Wash Detergent (1.5kg)", price: 195 }
+            ];
+            const picked = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
+            document.getElementById('ai-prod-name').value = picked.name;
+            document.getElementById('ai-prod-price').value = picked.price;
+            showToast("Photo scanned! Product name & details auto-filled.");
+        }
+
+        function saveDealerProduct() {
+            const name = document.getElementById('ai-prod-name').value.trim();
+            const price = parseInt(document.getElementById('ai-prod-price').value, 10);
+            if (!name || !price) {
+                showToast("Product name aur price daalein.", "error");
+                return;
+            }
+            if (currentUser && currentUser.shopId) {
+                const shop = shopsData.find(s => s.id === currentUser.shopId);
+                if (shop) {
+                    shop.products.unshift({ name, price, stock: "In Stock" });
+                }
+            }
+            closeDealerAddProductModal();
+            renderAllViews();
+            showToast(`"${name}" aapki shop page par add ho gaya!`);
+        }
+    </script>
+</body>
+</html>
